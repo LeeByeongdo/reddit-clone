@@ -1,11 +1,17 @@
 'use client';
 
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { FormEvent, useState } from 'react';
 import { InputGroup } from '../../components/InputGroup';
 import { API_BASE_URL } from '../../config/constants';
+
+interface RegisterError {
+  email?: string;
+  username?: string;
+  password?: string;
+}
 
 export default function Register() {
   const [email, setEmail] = useState('');
@@ -26,9 +32,13 @@ export default function Register() {
       });
 
       console.log('res', res);
-      router.push('/login');
+      // router.push('/login');
     } catch (e) {
       console.log('error', e);
+      if (e instanceof AxiosError<RegisterError>) {
+        const error = e as AxiosError<RegisterError>;
+        setErrors(error.response?.data);
+      }
     }
   };
 
@@ -64,7 +74,7 @@ export default function Register() {
 
           <small>
             이미 가입하셨나요?
-            <Link className="ml-1 uppercase text-blue-500" href="/login">
+            <Link className="ml-1 text-blue-500 uppercase" href="/login">
               <span>로그인</span>
             </Link>
           </small>
