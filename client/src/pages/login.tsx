@@ -3,25 +3,28 @@
 import axios, { AxiosError } from 'axios';
 import Link from 'next/link';
 import { FormEvent, useState } from 'react';
-import { collapseTextChangeRangesAcrossMultipleVersions } from 'typescript';
-import { InputGroup } from '../../components/InputGroup';
-import { API_BASE_URL } from '../../config/constants';
-import { LoginError } from '../../types/auth';
+import { InputGroup } from '../components/InputGroup';
+import { useAuthDispatch } from '../context/auth';
+import { LoginError } from '../types/auth';
 
 export default function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<any>();
 
+  const dispatch = useAuthDispatch();
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
     try {
       const res = await axios.post(
-        `${API_BASE_URL}/auth/login`,
+        `/auth/login`,
         { password, username },
         { withCredentials: true }
       );
+
+      dispatch('LOGIN', res.data.user);
 
       console.log(res);
     } catch (e) {

@@ -1,12 +1,9 @@
-'use client';
-
 import axios, { AxiosError } from 'axios';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter } from 'next/router';
 import { FormEvent, useState } from 'react';
-import { InputGroup } from '../../components/InputGroup';
-import { API_BASE_URL } from '../../config/constants';
-import { RegisterError } from '../../types/auth';
+import { InputGroup } from '../components/InputGroup';
+import { RegisterError } from '../types/auth';
 
 export default function Register() {
   const [email, setEmail] = useState('');
@@ -20,7 +17,7 @@ export default function Register() {
     e.preventDefault();
 
     try {
-      const res = await axios.post(`${API_BASE_URL}/auth/register`, {
+      const res = await axios.post(`/auth/register`, {
         email: email,
         username,
         password,
