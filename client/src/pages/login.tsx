@@ -2,9 +2,10 @@
 
 import axios, { AxiosError } from 'axios';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { FormEvent, useState } from 'react';
 import { InputGroup } from '../components/InputGroup';
-import { useAuthDispatch } from '../context/auth';
+import { useAuthDispatch, useAuthState } from '../context/auth';
 import { LoginError } from '../types/auth';
 
 export default function Login() {
@@ -13,6 +14,13 @@ export default function Login() {
   const [errors, setErrors] = useState<any>();
 
   const dispatch = useAuthDispatch();
+  const { authenticated } = useAuthState();
+
+  const router = useRouter();
+
+  if (authenticated) {
+    router.push('/');
+  }
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -25,8 +33,6 @@ export default function Login() {
       );
 
       dispatch('LOGIN', res.data.user);
-
-      console.log(res);
     } catch (e) {
       console.error(e);
       if (e instanceof AxiosError<LoginError>) {

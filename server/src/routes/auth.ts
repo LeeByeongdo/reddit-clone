@@ -4,17 +4,9 @@ import { User } from '../entity/User';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import cookie from 'cookie';
-
-const mapErrors = (errors: ValidationError[]) => {
-  return errors.reduce((prev, err) => {
-    if (!err.constraints) {
-      return prev;
-    }
-
-    prev[err.property] = Object.entries(err.constraints)[0][1];
-    return prev;
-  }, {} as { [key: string]: string});
-}
+import { mapErrors } from '../utils/helper';
+import userMiddleware from '../middlewares/user';
+import authMiddleware from '../middlewares/auth';
 
 const register = async (req: Request, res: Response) => {
   const { email, username, password } = req.body;
@@ -23,7 +15,7 @@ const register = async (req: Request, res: Response) => {
     let errors: any = {};
 
     const emailUser = await User.findOneBy({ email });
-    
+
     if (emailUser) {
       errors.email = '이미 해당 이메일 주소가 사용중입니다.';
     }
@@ -51,8 +43,6 @@ const register = async (req: Request, res: Response) => {
     await user.save();
 
     return res.json(user);
-
-
   } catch (e) {
     console.error(e);
     return res.status(500).json({ error: e });
@@ -60,7 +50,7 @@ const register = async (req: Request, res: Response) => {
 };
 
 const login = async (req: Request, res: Response) => {
-  const { email, username, password } = req.body;
+  const { username, password } = req.body;
 
   try {
     let errors: any = {};
@@ -79,13 +69,13 @@ const login = async (req: Request, res: Response) => {
 
     const user = await User.findOneBy({ username });
     if (!user) {
-      return res.status(404).json({ username: '없는 아이디 입니다.'});
+      return res.status(404).json({ username: '없는 아이디 입니다.' });
     }
 
     const passwordMatches = await bcrypt.compare(password, user.password);
-    
+
     if (!passwordMatches) {
-      return res.status(401).json({ password: '비밀번호가 맞지 않습니다.'});
+      return res.status(401).json({ password: '비밀번호가 맞지 않습니다.' });
     }
 
     const secret = process.env.JWT_SECRET;
@@ -95,22 +85,45 @@ const login = async (req: Request, res: Response) => {
 
     const token = jwt.sign({ username }, secret);
 
-    res.set('Set-Cookie', cookie.serialize('token', token, {
-      httpOnly: true,
-      maxAge: 60 * 60 * 24 * 7,
-      path: '/',
-    }));
+    res.set(
+      'Set-Cookie',
+      cookie.serialize('token', token, {
+        httpOnly: true,
+        maxAge: 60 * 60 * 24 * 7,
+        path: '/',
+      })
+    );
 
     return res.json({ user, token });
   } catch (e) {
     console.error(e);
     return res.status(500).json(e);
   }
-}
+};
 
+const me = async (_: Request, res: Response) => {
+  return res.json(res.locals.user);
+};
+
+const logout = async (_: Request, res: Response) => {
+  res.set(
+    'Set-Cookie',
+    cookie.serialize('token', '', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      expires: new Date(0),
+      path: '/',
+    })
+  );
+
+  res.status(200).json({ success: true });
+};
 
 const router = Router();
 router.post('/register', register);
 router.post('/login', login);
+router.get('/me', userMiddleware, authMiddleware, me);
+router.post('/logout', userMiddleware, authMiddleware, logout);
 
 export default router;

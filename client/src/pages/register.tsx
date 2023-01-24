@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { FormEvent, useState } from 'react';
 import { InputGroup } from '../components/InputGroup';
+import { useAuthState } from '../context/auth';
 import { RegisterError } from '../types/auth';
 
 export default function Register() {
@@ -11,7 +12,12 @@ export default function Register() {
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<any>();
 
+  const { authenticated } = useAuthState();
   const router = useRouter();
+
+  if (authenticated) {
+    router.push('/');
+  }
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -23,10 +29,9 @@ export default function Register() {
         password,
       });
 
-      console.log('res', res);
       router.push('/login');
     } catch (e) {
-      console.log('error', e);
+      console.error('error', e);
       if (e instanceof AxiosError<RegisterError>) {
         const error = e as AxiosError<RegisterError>;
         setErrors(error.response?.data);
