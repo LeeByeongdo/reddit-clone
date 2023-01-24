@@ -7,12 +7,13 @@ import cookie from 'cookie';
 import { mapErrors } from '../utils/helper';
 import userMiddleware from '../middlewares/user';
 import authMiddleware from '../middlewares/auth';
+import { LoginErrors, RegisterErrors } from '../types/auth';
 
 const register = async (req: Request, res: Response) => {
   const { email, username, password } = req.body;
 
   try {
-    let errors: any = {};
+    let errors: RegisterErrors = {};
 
     const emailUser = await User.findOneBy({ email });
 
@@ -34,10 +35,10 @@ const register = async (req: Request, res: Response) => {
     user.username = username;
     user.password = password;
 
-    errors = await validate(user);
+    errors = mapErrors(await validate(user));
 
     if (Object.keys(errors).length) {
-      return res.status(400).json(mapErrors(errors));
+      return res.status(400).json(errors);
     }
 
     await user.save();
@@ -53,7 +54,7 @@ const login = async (req: Request, res: Response) => {
   const { username, password } = req.body;
 
   try {
-    let errors: any = {};
+    let errors: LoginErrors = {};
 
     if (isEmpty(username)) {
       errors.username = '사용자 이름은 필수입니다.';

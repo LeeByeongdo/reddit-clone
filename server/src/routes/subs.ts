@@ -4,12 +4,12 @@ import authMiddleware from '../middlewares/auth';
 import { isEmpty } from 'class-validator';
 import { AppDataSource } from '../data-source';
 import Sub from '../entity/Sub';
-import { mapErrors } from '../utils/helper';
+import { SubsCreationErrors } from '../types/subs';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const { name, title, description } = req.body;
   try {
-    const errors: any = {};
+    const errors: SubsCreationErrors = {};
 
     if (isEmpty(name)) {
       errors.name = '이름은 비워둘 수  없습니다.';
@@ -27,7 +27,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     if (sub) errors.name = '서브 이름이 이미 존재합니다.';
 
     if (Object.keys(errors).length) {
-      return res.status(400).json(mapErrors(errors));
+      return res.status(400).json(errors);
     }
 
     console.log(name, title, description);

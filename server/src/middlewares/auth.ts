@@ -1,7 +1,7 @@
 import { Response, Request, NextFunction } from 'express';
 
 export default async function authMiddleware(
-  req: Request,
+  _: Request,
   res: Response,
   next: NextFunction
 ) {
