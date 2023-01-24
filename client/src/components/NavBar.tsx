@@ -1,7 +1,7 @@
 import axios from 'axios';
 import Link from 'next/link';
 import { MouseEvent } from 'react';
-import { useAuthDispatch, useAuthState } from '../context/auth';
+import { AuthActionType, useAuthDispatch, useAuthState } from '../context/auth';
 
 export default function NavBar() {
   const dispatch = useAuthDispatch();
@@ -11,7 +11,7 @@ export default function NavBar() {
 
     try {
       await axios.post('/auth/logout');
-      dispatch('LOGOUT');
+      dispatch(AuthActionType.LOGOUT);
       window.location.reload();
     } catch (e) {
       console.error(e);

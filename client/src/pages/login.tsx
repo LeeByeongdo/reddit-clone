@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { FormEvent, useState } from 'react';
 import { InputGroup } from '../components/InputGroup';
-import { useAuthDispatch, useAuthState } from '../context/auth';
+import { AuthActionType, useAuthDispatch, useAuthState } from '../context/auth';
 import { LoginError } from '../types/auth';
 
 export default function Login() {
@@ -32,7 +32,7 @@ export default function Login() {
         { withCredentials: true }
       );
 
-      dispatch('LOGIN', res.data.user);
+      dispatch(AuthActionType.LOGIN, res.data.user);
     } catch (e) {
       console.error(e);
       if (e instanceof AxiosError<LoginError>) {

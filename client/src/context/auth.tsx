@@ -19,25 +19,31 @@ const defaultAuthState = {
 };
 
 interface Action {
-  type: string;
+  type: AuthActionType;
   payload?: any;
+}
+
+export enum AuthActionType {
+  LOGIN,
+  LOGOUT,
+  STOP_LOADING,
 }
 
 const reducer = (state: AuthState, { type, payload }: Action) => {
   switch (type) {
-    case 'LOGIN':
+    case AuthActionType.LOGIN:
       return {
         ...state,
         authenticated: true,
         user: payload,
       };
-    case 'LOGOUT':
+    case AuthActionType.LOGOUT:
       return {
         ...state,
         authenticated: false,
         user: null,
       };
-    case 'STOP_LOADING':
+    case AuthActionType.STOP_LOADING:
       return {
         ...state,
         loading: false,
@@ -54,7 +60,7 @@ const DispatchContext = createContext<any>(null);
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [state, defaultDispatch] = useReducer(reducer, defaultAuthState);
 
-  const dispatch = (type: string, payload?: any) => {
+  const dispatch = (type: AuthActionType, payload?: any) => {
     defaultDispatch({ type, payload });
   };
 
@@ -62,11 +68,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const loadUser = async () => {
       try {
         const res = await axios.get('/auth/me');
-        dispatch('LOGIN', res.data);
+        dispatch(AuthActionType.LOGIN, res.data);
       } catch (e) {
         console.error(e);
       } finally {
-        dispatch('STOP_LOADING');
+        dispatch(AuthActionType.STOP_LOADING);
       }
     };
 
