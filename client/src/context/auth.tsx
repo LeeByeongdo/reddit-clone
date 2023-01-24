@@ -20,7 +20,7 @@ const defaultAuthState = {
 
 interface Action {
   type: AuthActionType;
-  payload?: any;
+  payload?: User;
 }
 
 export enum AuthActionType {
@@ -41,7 +41,7 @@ const reducer = (state: AuthState, { type, payload }: Action) => {
       return {
         ...state,
         authenticated: false,
-        user: null,
+        user: undefined,
       };
     case AuthActionType.STOP_LOADING:
       return {
@@ -53,14 +53,18 @@ const reducer = (state: AuthState, { type, payload }: Action) => {
   }
 };
 
+type DispatchType = (type: AuthActionType, payload?: User) => void;
+
 const AuthContext = createContext<AuthState>(defaultAuthState);
 
-const DispatchContext = createContext<any>(null);
+const DispatchContext = createContext<DispatchType>(
+  (_: AuthActionType, __?: User) => {}
+);
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [state, defaultDispatch] = useReducer(reducer, defaultAuthState);
 
-  const dispatch = (type: AuthActionType, payload?: any) => {
+  const dispatch = (type: AuthActionType, payload?: User) => {
     defaultDispatch({ type, payload });
   };
 

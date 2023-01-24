@@ -9,10 +9,11 @@ export interface LoginError {
   password?: string;
 }
 
-export interface SubsCreationError {
-  name?: string;
-}
-
 export interface User {
   username: string;
+}
+
+export interface LoginResponse {
+  user: User;
+  token: string;
 }

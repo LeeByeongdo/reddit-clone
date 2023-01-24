@@ -3,13 +3,13 @@ import { GetServerSideProps } from 'next';
 import Router from 'next/router';
 import { FormEvent, useState } from 'react';
 import { InputGroup } from '../../components/InputGroup';
-import { SubsCreationError } from '../../types/auth';
+import { SubsCreationError } from '../../types/subs';
 
 export default function SubCreation() {
   const [name, setName] = useState('');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [errors, setErrors] = useState<any>({});
+  const [errors, setErrors] = useState<SubsCreationError>({});
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -25,7 +25,7 @@ export default function SubCreation() {
       console.error(e);
       if (e instanceof AxiosError<SubsCreationError>) {
         const error = e as AxiosError<SubsCreationError>;
-        setErrors(error.response?.data);
+        setErrors(error.response?.data ?? {});
       }
     }
   };
@@ -70,7 +70,6 @@ export default function SubCreation() {
             <InputGroup
               placeholder="설명"
               value={description}
-              error={errors.description}
               setValue={setDescription}
             />
           </div>

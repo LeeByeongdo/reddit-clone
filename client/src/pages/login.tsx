@@ -1,17 +1,15 @@
-'use client';
-
 import axios, { AxiosError } from 'axios';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { FormEvent, useState } from 'react';
 import { InputGroup } from '../components/InputGroup';
 import { AuthActionType, useAuthDispatch, useAuthState } from '../context/auth';
-import { LoginError } from '../types/auth';
+import { LoginError, LoginResponse } from '../types/auth';
 
 export default function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [errors, setErrors] = useState<any>();
+  const [errors, setErrors] = useState<LoginError>();
 
   const dispatch = useAuthDispatch();
   const { authenticated } = useAuthState();
@@ -26,13 +24,14 @@ export default function Login() {
     e.preventDefault();
 
     try {
-      const res = await axios.post(
+      const res = await axios.post<LoginResponse>(
         `/auth/login`,
         { password, username },
         { withCredentials: true }
       );
 
       dispatch(AuthActionType.LOGIN, res.data.user);
+      router.push('/');
     } catch (e) {
       console.error(e);
       if (e instanceof AxiosError<LoginError>) {
