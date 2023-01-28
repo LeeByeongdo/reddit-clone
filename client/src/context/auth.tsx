@@ -74,7 +74,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         const res = await axios.get('/auth/me');
         dispatch(AuthActionType.LOGIN, res.data);
       } catch (e) {
-        console.error(e);
       } finally {
         dispatch(AuthActionType.STOP_LOADING);
       }

@@ -26,6 +26,8 @@ app.get('/', (_, res) => res.send('running'));
 app.use('/api/auth', authRouter);
 app.use('/api/subs', subsRouter);
 
+app.use(express.static('public'));
+
 const port = 4000;
 app.listen(port, async () => {
   console.log(`Server is running at http://localhost:${port}`);
