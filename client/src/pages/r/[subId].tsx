@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import useSWR from 'swr';
+import { SideBar } from '../../components/SideBar';
 import { useAuthState } from '../../context/auth';
 import { Sub } from '../../types/subs';
 
@@ -115,6 +116,7 @@ export default function SubDetail() {
                     alt={'커뮤니티 이미지'}
                     width={70}
                     height={70}
+                    style={{ height: '70px' }}
                     className="rounded-full"
                     onClick={() => openFileInput('image')}
                   />
@@ -132,7 +134,10 @@ export default function SubDetail() {
           </div>
         </div>
 
-        <div className="flex max-w-5xl px-4 pt-5 mx-auto"></div>
+        <div className="flex max-w-5xl px-4 pt-5 mx-auto">
+          <div className="w-full md:mr-3 md:w-8/12"></div>
+          <SideBar sub={sub} />
+        </div>
       </>
     </>
   );

@@ -8,12 +8,8 @@ import { Sub } from '../types/subs';
 export default function Home() {
   const { authenticated } = useAuthState();
 
-  const fetcher = async (url: string) => {
-    return axios.get(url).then((res) => res.data);
-  };
-
   const address = '/subs/topSubs';
-  const { data: topSubs } = useSWR<Sub[]>(address, fetcher);
+  const { data: topSubs } = useSWR<Sub[]>(address);
   return (
     <div className="flex max-w-5xl px-4 pt-5 mx-auto">
       <div className="w-full md:mr-3 md:w-8/12"></div>
