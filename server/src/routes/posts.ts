@@ -1,4 +1,5 @@
 import { Request, Response, Router } from 'express';
+import { Comment } from '../entity/Comment';
 import Post from '../entity/Post';
 import Sub from '../entity/Sub';
 import authMiddleware from '../middlewares/auth';
@@ -48,8 +49,55 @@ const getPost = async (req: Request, res: Response) => {
   }
 };
 
+const createPostComment = async (req: Request, res: Response) => {
+  const { identifier, slug } = req.params;
+  const body = req.body.body;
+
+  try {
+    const post = await Post.findOneByOrFail({ identifier, slug });
+    const comment = new Comment();
+    comment.body = body;
+    comment.user = res.locals.user;
+    comment.post = post;
+
+    if (res.locals.user) {
+      post.setUserVote(res.locals.user);
+    }
+
+    await comment.save();
+    return res.json(comment);
+  } catch (e) {
+    console.log(e);
+    return res.status(404).json({ error: '게시물을 찾을 수 없습니다.' });
+  }
+};
+
+const getPostComments = async (req: Request, res: Response) => {
+  const { identifier, slug } = req.params;
+
+  try {
+    const post = await Post.findOneByOrFail({ identifier, slug });
+    const comments = await Comment.find({
+      where: { postId: post.id },
+      order: { createdAt: 'DESC' },
+      relations: ['votes'],
+    });
+
+    if (res.locals.user) {
+      comments.forEach((c) => c.setUserVote(res.locals.user));
+    }
+
+    return res.json(comments);
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({ error: '문제가 발생해습니다.' });
+  }
+};
+
 const router = Router();
 router.get('/:identifier/:slug', userMiddleware, getPost);
 router.post('/', userMiddleware, authMiddleware, createPost);
+router.post('/:identifier/:slug/comments', userMiddleware, createPostComment);
+router.get('/:identifier/:slug/comments', userMiddleware, getPostComments);
 
 export default router;
