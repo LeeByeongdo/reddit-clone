@@ -28,7 +28,7 @@ export interface Post {
   sub?: Sub;
   url: string;
   userVote?: number;
-  voteCount?: number;
+  voteScore?: number;
   commentCount?: number;
   createdAt: string;
   updatedAt: string;

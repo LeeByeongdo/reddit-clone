@@ -7,6 +7,7 @@ import { FormEvent, useState } from 'react';
 import useSWR from 'swr';
 import { useAuthState } from '../../../../context/auth';
 import { Comment, Post } from '../../../../types/subs';
+import { FaArrowUp, FaArrowDown } from 'react-icons/fa';
 
 export default function PostDetail() {
   const router = useRouter();
@@ -14,15 +15,15 @@ export default function PostDetail() {
   const [newComment, setNewComment] = useState('');
   const { identifier, subId, slug } = router.query;
 
-  const { data: post, error } = useSWR<Post>(
-    identifier && slug ? `/posts/${identifier}/${slug}` : ''
-  );
+  const {
+    data: post,
+    error,
+    mutate: postMutate,
+  } = useSWR<Post>(identifier && slug ? `/posts/${identifier}/${slug}` : '');
 
-  const { data: comments, mutate } = useSWR<Comment[]>(
+  const { data: comments, mutate: commentMutate } = useSWR<Comment[]>(
     identifier && slug ? `/posts/${identifier}/${slug}/comments` : null
   );
-
-  console.log(comments);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -35,8 +36,35 @@ export default function PostDetail() {
       await axios.post(`/posts/${post?.identifier}/${post?.slug}/comments`, {
         body: newComment,
       });
-      mutate();
+      commentMutate();
       setNewComment('');
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  const vote = async (value: number, comment?: Comment) => {
+    if (!authenticated) {
+      router.push('/login');
+    }
+
+    if (
+      (!comment && value === post?.userVote) ||
+      (comment && comment.userVote === value)
+    ) {
+      value = 0;
+    }
+
+    try {
+      await axios.post('/votes', {
+        identifier,
+        slug,
+        commentIdentifier: comment?.identifier,
+        value,
+      });
+
+      postMutate();
+      commentMutate();
     } catch (e) {
       console.log(e);
     }
@@ -51,25 +79,25 @@ export default function PostDetail() {
               <div className="flex">
                 <div className="flex-shrink-0 w-10 py-2 text-center rounded-l">
                   <div
-                    className="w-6 mx-auto text-gray-400 rounded cursor-pointer hover:bg-gray-300 hover:text-red-500"
+                    className="flex justify-center w-6 mx-auto text-gray-400 rounded cursor-pointer hover:bg-gray-300 hover:text-red-500"
                     onClick={() => vote(1)}
                   >
-                    <i
-                      className={classNames('fas fa-arrow-up', {
-                        'text-red-500': post.userVote === 1,
-                      })}
-                    />
+                    {post.userVote === 1 ? (
+                      <FaArrowUp className="text-red-500" />
+                    ) : (
+                      <FaArrowUp />
+                    )}
                   </div>
-                  <p className="text-xs font-bold">{post.voteCount}</p>
+                  <p className="text-xs font-bold">{post.voteScore}</p>
                   <div
-                    className="w-6 mx-auto text-gray-400 rounded cursor-pointer hover:bg-gray-300 hover:text-red-500"
+                    className="flex justify-center w-6 mx-auto text-gray-400 rounded cursor-pointer hover:bg-gray-300 hover:text-red-500"
                     onClick={() => vote(-1)}
                   >
-                    <i
-                      className={classNames('fas fa-arrow-up', {
-                        'text-red-blue': post.userVote === -1,
-                      })}
-                    />
+                    {post.userVote === -1 ? (
+                      <FaArrowDown className="text-blue-500" />
+                    ) : (
+                      <FaArrowDown />
+                    )}
                   </div>
                 </div>
                 <div className="py-2 pr-2">
@@ -150,25 +178,25 @@ export default function PostDetail() {
                 <div className="flex" key={comment.identifier}>
                   <div className="flex-shrink-0 w-10 py-2 text-center rounded-l">
                     <div
-                      className="w-6 mx-auto text-gray-400 rounded cursor-pointer hover:bg-gray-300 hover:text-red-500"
+                      className="flex justify-center w-6 mx-auto text-gray-400 rounded cursor-pointer hover:bg-gray-300 hover:text-red-500"
                       onClick={() => vote(1, comment)}
                     >
-                      <i
-                        className={classNames('fas fa-arrow-up', {
-                          'text-red-500': comment.userVote === 1,
-                        })}
-                      />
+                      {comment.userVote === 1 ? (
+                        <FaArrowUp className="text-red-500" />
+                      ) : (
+                        <FaArrowUp />
+                      )}
                     </div>
                     <p className="text-xs font-bold">{comment.voteScore}</p>
                     <div
-                      className="w-6 mx-auto text-gray-400 rounded cursor-pointer hover:bg-gray-300 hover:text-red-500"
+                      className="flex justify-center w-6 mx-auto text-gray-400 rounded cursor-pointer hover:bg-gray-300 hover:text-red-500"
                       onClick={() => vote(-1, comment)}
                     >
-                      <i
-                        className={classNames('fas fa-arrow-up', {
-                          'text-red-blue': comment.userVote === -1,
-                        })}
-                      />
+                      {comment.userVote === -1 ? (
+                        <FaArrowDown className="text-blue-500" />
+                      ) : (
+                        <FaArrowDown />
+                      )}
                     </div>
                   </div>
                   <div className="py-2 pr-2">
