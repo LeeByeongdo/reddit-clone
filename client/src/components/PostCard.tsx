@@ -7,6 +7,7 @@ import { useAuthState } from '../context/auth';
 import { useRouter } from 'next/router';
 import axios from 'axios';
 import { KeyedMutator, mutate } from 'swr';
+import Vote from './Vote';
 
 interface PostCardProps {
   post: Post;
@@ -61,29 +62,7 @@ export default function PostCard({
 
   return (
     <div className="flex mb-4 bg-white rounded" id={identifier}>
-      <div className="flex-shrink-0 w-10 py-2 text-center rounded-l">
-        <div
-          className="flex justify-center w-6 mx-auto text-gray-400 rounded cursor-pointer hover:bg-gray-300 hover:text-red-500"
-          onClick={() => vote(1)}
-        >
-          {userVote === 1 ? (
-            <FaArrowUp className="text-red-500" />
-          ) : (
-            <FaArrowUp />
-          )}
-        </div>
-        <p className="text-xs font-bold">{voteScore}</p>
-        <div
-          className="flex justify-center w-6 mx-auto text-gray-400 rounded cursor-pointer hover:bg-gray-300 hover:text-red-500"
-          onClick={() => vote(-1)}
-        >
-          {userVote === -1 ? (
-            <FaArrowDown className="text-blue-500" />
-          ) : (
-            <FaArrowDown />
-          )}
-        </div>
-      </div>
+      <Vote vote={vote} userVote={userVote} voteScore={voteScore} />
 
       <div className="w-full p-2">
         {!isSubPage && (
