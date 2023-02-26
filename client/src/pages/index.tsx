@@ -3,16 +3,85 @@ import Image from 'next/image';
 import Link from 'next/link';
 import useSWR from 'swr';
 import { useAuthState } from '../context/auth';
-import { Sub } from '../types/subs';
+import { Post, Sub } from '../types/subs';
+import useSWRInfinite from 'swr/infinite';
+import PostCard from '../components/PostCard';
+import { useEffect, useState } from 'react';
 
 export default function Home() {
   const { authenticated } = useAuthState();
 
   const address = '/subs/topSubs';
+
+  const getKey = (pageIndex: number, previousPageData: Post[]) => {
+    if (previousPageData && !previousPageData.length) {
+      return null;
+    }
+
+    return `/posts?page=${pageIndex}`;
+  };
+
+  const {
+    data,
+    error,
+    size: page,
+    setSize: setPage,
+    isValidating,
+    mutate,
+  } = useSWRInfinite(getKey);
+
+  const posts: Post[] = data ? [].concat(...data) : [];
+  const isInitialLoading = !posts && !error;
+
+  const [observedPost, setObservedPost] = useState('');
+
+  const observeElement = (element: HTMLElement | null) => {
+    if (!element) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting === true) {
+          console.log('마지막 포스트입니다.');
+          setPage(page + 1);
+          observer.unobserve(element);
+        }
+      },
+      { threshold: 1 }
+    );
+
+    observer.observe(element);
+  };
+
+  useEffect(() => {
+    if (!posts || posts.length === 0) {
+      return;
+    }
+
+    const id = posts[posts.length - 1].identifier;
+
+    if (id !== observedPost) {
+      setObservedPost(id);
+      observeElement(document.getElementById(id));
+    }
+  }, [posts]);
+
   const { data: topSubs } = useSWR<Sub[]>(address);
+
   return (
     <div className="flex max-w-5xl px-4 pt-5 mx-auto">
-      <div className="w-full md:mr-3 md:w-8/12"></div>
+      <div className="w-full md:mr-3 md:w-8/12">
+        {isInitialLoading && (
+          <p className="text-lg text-center">로딩중입니다.</p>
+        )}
+        {posts &&
+          posts?.map((post) => {
+            return (
+              <PostCard key={post.identifier} post={post} mutate={mutate} />
+            );
+          })}
+      </div>
 
       <div className="hidden w-4/12 ml-3 md:block">
         <div className="bg-white border rounded">

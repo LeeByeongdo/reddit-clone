@@ -5,6 +5,29 @@ import Sub from '../entity/Sub';
 import authMiddleware from '../middlewares/auth';
 import userMiddleware from '../middlewares/user';
 
+const getPosts = async (req: Request, res: Response) => {
+  const currentPage = (req.query.page || 0) as number;
+  const perPage = (req.query.count || 8) as number;
+
+  try {
+    const posts = await Post.find({
+      order: { createdAt: 'DESC' },
+      relations: ['sub', 'votes', 'comments'],
+      skip: currentPage * perPage,
+      take: perPage,
+    });
+
+    if (res.locals.user) {
+      posts.forEach((p) => p.setUserVote(res.locals.user));
+    }
+
+    return res.json(posts);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error });
+  }
+};
+
 const createPost = async (req: Request, res: Response) => {
   const { title, body, sub } = req.body;
 
@@ -97,6 +120,7 @@ const getPostComments = async (req: Request, res: Response) => {
 const router = Router();
 router.get('/:identifier/:slug', userMiddleware, getPost);
 router.post('/', userMiddleware, authMiddleware, createPost);
+router.get('/', userMiddleware, getPosts);
 router.post('/:identifier/:slug/comments', userMiddleware, createPostComment);
 router.get('/:identifier/:slug/comments', userMiddleware, getPostComments);
 

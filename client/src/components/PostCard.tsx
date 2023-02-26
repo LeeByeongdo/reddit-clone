@@ -6,11 +6,12 @@ import dayjs from 'dayjs';
 import { useAuthState } from '../context/auth';
 import { useRouter } from 'next/router';
 import axios from 'axios';
-import { KeyedMutator } from 'swr';
+import { KeyedMutator, mutate } from 'swr';
 
 interface PostCardProps {
   post: Post;
-  subMutate: KeyedMutator<Sub>;
+  subMutate?: KeyedMutator<Sub>;
+  mutate?: KeyedMutator<Post[]>;
 }
 
 export default function PostCard({
@@ -29,6 +30,7 @@ export default function PostCard({
     commentCount,
   },
   subMutate,
+  mutate,
 }: PostCardProps) {
   const { authenticated } = useAuthState();
   const router = useRouter();
@@ -45,7 +47,13 @@ export default function PostCard({
 
     try {
       await axios.post('/votes', { identifier, slug, value });
-      subMutate();
+      if (subMutate) {
+        subMutate();
+      }
+
+      if (mutate) {
+        mutate();
+      }
     } catch (error) {
       console.error(error);
     }
