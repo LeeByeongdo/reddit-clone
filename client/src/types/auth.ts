@@ -11,6 +11,7 @@ export interface LoginError {
 
 export interface User {
   username: string;
+  createdAt?: string;
 }
 
 export interface LoginResponse {
