@@ -32,7 +32,7 @@ export default function SubCreation() {
 
   return (
     <div className="flex flex-col justify-center pt-16">
-      <div className="w-10/12 mx-auto md:w-96 bg-white rounded p-4">
+      <div className="w-10/12 p-4 mx-auto bg-white rounded md:w-96">
         <h1 className="mb-2 text-lg font-medium">커뮤니티 만들기</h1>
         <hr />
         <form onSubmit={handleSubmit}>
@@ -75,7 +75,7 @@ export default function SubCreation() {
           </div>
 
           <div className="flex justify-end">
-            <button className="px-4 py-1 text-sm font-semibold rounded text-white bg-gray-400 border">
+            <button className="px-4 py-1 text-sm font-semibold text-white bg-gray-400 border rounded">
               커뮤니티 만들기
             </button>
           </div>
@@ -93,7 +93,7 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
       throw new Error('Missing auth token cookie');
     }
 
-    await axios.get('/auth/me', { headers: { cookie } });
+    await axios.get(`${process.env.NEXT_PUBLIC_SERVER_BASE_URL}/api/auth/me`, { headers: { cookie } });
 
     return { props: {} };
   } catch (e) {
