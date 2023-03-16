@@ -1,6 +1,6 @@
 module.exports = {
   apps: [{
-    name: 'reddit-clone',
+    name: 'reddit-client',
     script: 'npm run start:production'
   }]
 }
