@@ -36,7 +36,7 @@ app.use(express.static('public'));
 
 const port = 4000;
 app.listen(port, async () => {
-  console.log(`Server is running at http://localhost:${port}`);
+  console.log(`Server is running at ${process.env.APP_URL}`);
 
   AppDataSource.initialize()
     .then(async () => {
