@@ -9,7 +9,7 @@ import { AuthProvider } from '../context/auth';
 import './../styles/globals.css';
 
 export default function MyApp({ Component, pageProps }: AppProps) {
-  Axios.defaults.baseURL = 'http://localhost:4000/api';
+  Axios.defaults.baseURL = `${process.env.NEXT_PUBLIC_SERVER_BASE_URL}/api`;
   Axios.defaults.withCredentials = true;
 
   const { pathname } = useRouter();
